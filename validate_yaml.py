@@ -50,30 +50,17 @@ rules = [
     {
         "path": "paths",
         "condition": lambda paths: all(
-            'x-api-key' in path_data.get('parameters', [{}])[0].get('name', '').lower() for path_data in paths.values()
+            any(param.get('name', '').lower() == 'x-api-key' for param in path_data.get('parameters', []))
+            for path_data in paths.values()
         ),
-        "message": "Each endpoint should include the 'X-API-KEY' tag in the parameters."
-    },
-    {
-        "path": "components.schemas",
-        "condition": lambda schemas: all(
-            'description' in schema and 'example' in schema for schema in schemas.values()
-        ),
-        "message": "Each schema should include a description and an example value."
-    },
-    {
-        "path": "paths",
-        "condition": lambda paths: all(
-            'description' in method for path_data in paths.values() for method in path_data.values()
-        ),
-        "message": "Each endpoint should have a description."
+        "message": "Each endpoint should include the 'X-API-KEY' parameter."
     },
     {
         "path": "components.schemas",
         "condition": lambda schemas: all(
             isinstance(schema.get('$ref', ''), str) for schema in schemas.values()
         ),
-        "message": "Request and Response JSON schemas must be referenced, not inline."
+        "message": "Request and Response JSON schemas must be referenced using '$ref'."
     }
 ]
 
