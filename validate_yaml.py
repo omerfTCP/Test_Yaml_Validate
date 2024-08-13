@@ -21,6 +21,8 @@ def check_custom_rules(data, rules):
         for key in keys:
             if isinstance(value, dict) and key in value:
                 value = value[key]
+            elif isinstance(value, list) and key.isdigit() and int(key) < len(value):
+                value = value[int(key)]
             else:
                 value = None
                 break
@@ -31,17 +33,47 @@ def check_custom_rules(data, rules):
     
     return errors
 
-# Example custom rules
+# Custom validation rules
 rules = [
     {
-        "path": "config.timeout",
-        "condition": lambda x: isinstance(x, int) and x > 0,
-        "message": "config.timeout should be a positive integer."
+        "path": "servers",
+        "condition": lambda x: isinstance(x, list) and len(x) == 1,
+        "message": "YAML should have exactly one server."
     },
     {
-        "path": "services.database.host",
-        "condition": lambda x: isinstance(x, str) and len(x) > 0,
-        "message": "services.database.host should be a non-empty string."
+        "path": "paths",
+        "condition": lambda paths: all(
+            'x-amazon-apigateway-integration' in path_data for path_data in paths.values()
+        ),
+        "message": "Each endpoint must have a 'x-amazon-apigateway-integration' entry."
+    },
+    {
+        "path": "paths",
+        "condition": lambda paths: all(
+            'x-api-key' in path_data.get('parameters', [{}])[0].get('name', '').lower() for path_data in paths.values()
+        ),
+        "message": "Each endpoint should include the 'X-API-KEY' tag in the parameters."
+    },
+    {
+        "path": "components.schemas",
+        "condition": lambda schemas: all(
+            'description' in schema and 'example' in schema for schema in schemas.values()
+        ),
+        "message": "Each schema should include a description and an example value."
+    },
+    {
+        "path": "paths",
+        "condition": lambda paths: all(
+            'description' in method for path_data in paths.values() for method in path_data.values()
+        ),
+        "message": "Each endpoint should have a description."
+    },
+    {
+        "path": "components.schemas",
+        "condition": lambda schemas: all(
+            isinstance(schema.get('$ref', ''), str) for schema in schemas.values()
+        ),
+        "message": "Request and Response JSON schemas must be referenced, not inline."
     }
 ]
 
