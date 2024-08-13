@@ -43,17 +43,10 @@ rules = [
     {
         "path": "paths",
         "condition": lambda paths: all(
-            'x-amazon-apigateway-integration' in path_data for path_data in paths.values()
-        ),
-        "message": "Each endpoint must have a 'x-amazon-apigateway-integration' entry."
-    },
-    {
-        "path": "paths",
-        "condition": lambda paths: all(
-            any(param.get('name', '').lower() == 'x-api-key' for param in path_data.get('parameters', []))
+            any(param.get('name', '').lower() == 'x-api-key' and param.get('in') == 'header' for param in path_data.get('parameters', []))
             for path_data in paths.values()
         ),
-        "message": "Each endpoint should include the 'X-API-KEY' parameter."
+        "message": "Each request must include an 'X-API-KEY' header parameter."
     },
     {
         "path": "components.schemas",
