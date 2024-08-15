@@ -76,7 +76,7 @@ paths:
               - asc
         - name: perpage
           in: query
-          description: Number of results required per page
+          description: Number of results required per page.
           required: false
           schema:
             type: integer

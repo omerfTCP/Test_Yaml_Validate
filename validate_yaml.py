@@ -1,77 +1,70 @@
 import yaml
+import sys
 
-def validate_yaml(file_path):
-    try:
-        with open(file_path, 'r') as f:
-            data = yaml.safe_load(f)
-        return data, None
-    except yaml.YAMLError as exc:
-        return None, str(exc)
+def validate_yaml(yaml_file):
+    with open(yaml_file, 'r') as file:
+        try:
+            yaml_content = yaml.safe_load(file)
+        except yaml.YAMLError as exc:
+            print(f"Error in YAML file: {exc}")
+            return False
 
-def check_custom_rules(data, rules):
-    errors = []
-    for rule in rules:
-        path = rule.get("path")
-        condition = rule.get("condition")
-        message = rule.get("message")
-        
-        # Traverse the YAML structure based on the path
-        keys = path.split('.')
-        value = data
-        for key in keys:
-            if isinstance(value, dict) and key in value:
-                value = value[key]
-            elif isinstance(value, list) and key.isdigit() and int(key) < len(value):
-                value = value[int(key)]
+    # Check for the basic structure requirements
+    if 'servers' not in yaml_content:
+        print("YAML is missing 'servers' key.")
+        return False
+    if len(yaml_content['servers']) != 1:
+        print("YAML must have exactly one server.")
+        return False
+
+    if 'paths' not in yaml_content:
+        print("YAML is missing 'paths' key.")
+        return False
+
+    for path, methods in yaml_content['paths'].items():
+        for method, details in methods.items():
+            # Check for x-amazon-apigateway-integration
+            if 'x-amazon-apigateway-integration' not in details:
+                print(f"Path {path} method {method} is missing 'x-amazon-apigateway-integration'.")
+                return False
+
+            # Check for parameters in each method
+            if 'parameters' in details:
+                api_key_present = any(
+                    param['name'].lower() == 'x-api-key' and param['in'] == 'header'
+                    for param in details['parameters']
+                )
+                if not api_key_present:
+                    print(f"Path {path} method {method} is missing 'X-API-KEY' header parameter.")
+                    return False
             else:
-                value = None
-                break
-        
-        # Apply the condition on the extracted value
-        if not condition(value):
-            errors.append(message)
-    
-    return errors
+                print(f"Path {path} method {method} has no parameters defined.")
+                return False
 
-# Custom validation rules
-rules = [
-    {
-        "path": "servers",
-        "condition": lambda x: isinstance(x, list) and len(x) == 1,
-        "message": "YAML should have exactly one server."
-    },
-    {
-        "path": "paths",
-        "condition": lambda paths: all(
-            any(param.get('name', '').lower() == 'x-api-key' and param.get('in') == 'header' for param in path_data.get('parameters', []))
-            for path_data in paths.values()
-        ),
-        "message": "Each request must include an 'X-API-KEY' header parameter."
-    },
-    {
-        "path": "components.schemas",
-        "condition": lambda schemas: all(
-            isinstance(schema.get('$ref', ''), str) for schema in schemas.values()
-        ),
-        "message": "Request and Response JSON schemas must be referenced using '$ref'."
-    }
-]
+            # Check for $ref in request and response schemas
+            if 'requestBody' in details and 'content' in details['requestBody']:
+                for content_type, content_details in details['requestBody']['content'].items():
+                    if 'schema' in content_details and '$ref' not in content_details['schema']:
+                        print(f"Path {path} method {method} requestBody schema is not referenced using $ref.")
+                        return False
 
-# Path to the YAML file
-yaml_file_path = "portal_2.0_oas.yaml"
+            if 'responses' in details:
+                for status_code, response_details in details['responses'].items():
+                    if 'content' in response_details:
+                        for content_type, content_details in response_details['content'].items():
+                            if 'schema' in content_details and '$ref' not in content_details['schema']:
+                                print(f"Path {path} method {method} response schema for status {status_code} is not referenced using $ref.")
+                                return False
 
-# Validate YAML
-data, error = validate_yaml(yaml_file_path)
-if error:
-    print(f"YAML validation error: {error}")
-    exit(1)
-else:
-    # Check custom rules
-    rule_errors = check_custom_rules(data, rules)
-    if rule_errors:
-        print("Custom rule violations found:")
-        for err in rule_errors:
-            print(f" - {err}")
-        exit(1)
-    else:
-        print("YAML content is valid and meets all custom rules.")
+    print("YAML structure is valid.")
+    return True
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python validate_yaml.py <yaml_file>")
+        sys.exit(1)
+
+    yaml_file = sys.argv[1]
+    is_valid = validate_yaml(yaml_file)
+    if not is_valid:
+        sys.exit(1)

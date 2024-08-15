@@ -26,9 +26,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install pyyaml
 
-    - name: Validate YAML and check custom rules
+    - name: Validate Portal 2 YAML and check custom rules
       run: |
-        python validate_yaml.py
+        python validate_yaml.py portal_2.0_oas.yaml
 
     - name: Fail if custom rules are violated
       if: failure()
