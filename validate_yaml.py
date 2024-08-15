@@ -1,10 +1,22 @@
 import yaml
 import sys
 
+# Custom SafeLoader to avoid automatic date parsing
+class NoDatesSafeLoader(yaml.SafeLoader):
+    def construct_yaml_timestamp(self, node):
+        # Override to avoid parsing dates
+        return str(node.value)
+
+# Attach the overridden method to avoid timestamp parsing
+NoDatesSafeLoader.add_constructor(
+    'tag:yaml.org,2002:timestamp',
+    NoDatesSafeLoader.construct_yaml_timestamp
+)
+
 def validate_yaml(yaml_file):
     with open(yaml_file, 'r') as file:
         try:
-            yaml_content = yaml.safe_load(file)
+            yaml_content = yaml.load(file, Loader=NoDatesSafeLoader)
         except yaml.YAMLError as exc:
             print(f"Error in YAML file: {exc}")
             return False
