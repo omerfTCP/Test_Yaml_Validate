@@ -28,7 +28,7 @@ jobs:
 
     - name: Validate Portal 2 YAML and check custom rules
       run: |
-        python validate_yaml.py portal_2.0_oas.yaml
+        python validate_yaml.py ../portal_2.0_oas.yaml
 
     - name: Fail if custom rules are violated
       if: failure()
