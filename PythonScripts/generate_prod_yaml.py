@@ -24,7 +24,6 @@ def dict_representer(dumper, data):
 OrderedDumper.add_representer(OrderedDict, dict_representer)
 
 def generate_prod_yaml(file_path, replacements):
- +   # Load the YAML file with preserved order
     with open(file_path, 'r') as file:
         yaml_content = yaml.load(file, Loader=NoDatesSafeLoader)
 
