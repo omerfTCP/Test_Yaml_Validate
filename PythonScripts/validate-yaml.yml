@@ -10,8 +10,8 @@ on:
 
 env:
   
-  TARGET_PORTAL2_YAML_PATH: "../DEV_portal_2.0_oas.yaml"
-  PY_VALIDATE_YAML_SCRIPT_PATH: "../validate_yaml.py"
+  TARGET_PORTAL2_YAML_PATH: "DEV_portal_2.0_oas.yaml"
+  PY_VALIDATE_YAML_SCRIPT_PATH: "PythonScripts/validate_yaml.py"
 
 jobs:
   validate_yaml:
