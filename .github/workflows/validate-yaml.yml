@@ -8,6 +8,11 @@ on:
     branches:
       - main
 
+env:
+  
+  TARGET_PORTAL2_YAML_PATH: "../DEV_portal_2.0_oas.yaml"
+  PY_VALIDATE_YAML_SCRIPT_PATH: "../validate_yaml.py"
+
 jobs:
   validate_yaml:
     runs-on: ubuntu-latest
@@ -28,7 +33,7 @@ jobs:
 
     - name: Validate Portal 2 YAML and check custom rules
       run: |
-        python validate_yaml.py ../portal_2.0_oas.yaml
+        python {{ env.PY_VALIDATE_YAML_SCRIPT_PATH }} {{ env.TARGET_PORTAL2_YAML_PATH }}
 
     - name: Fail if custom rules are violated
       if: failure()
