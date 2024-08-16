@@ -24,10 +24,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install pyyaml
 
-    - name: Run YAML replacement script
+    - name: Run YAML replacement script for DEV_portal_2.0_oas.yaml
       run: |
-        python path/to/your_script.py 'DEV_portal_2.0_oas.yaml'
+        python PythonScripts/generate_prod_yaml.py 'DEV_portal_2.0_oas.yaml'
       env:
-        INPUT_YAML_PATH: '../DEV_portal_2.0_oas.yaml'
+        INPUT_YAML_PATH: 'DEV_portal_2.0_oas.yaml'
         REPLACEMENTS: "[('The Credit Pros - DEV Portal 2.0 API', 'The Credit Pros - Portal 2.0 API'), ('https://api-dev2.thecreditpros.com/portal2', 'https://api.thecreditpros.com/portal2'), ('https://portal2.dev.thecreditpros.com/', 'https://portal2.thecreditpros.com/'), ('u7xdb3zrb1', 'PROD_u7xdb3zrb1'), ('AWS GW Dev Environment','AWS GW Prod Environment')]"
 
