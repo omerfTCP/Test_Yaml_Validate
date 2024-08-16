@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
   description: |
-    The Credit Pros - DEV Portal 2.0 API
+    The Credit Pros - DEV Portal 2.0 API.
   version: '1.1'
   title: Portal 2.0 API
   termsOfService: 'http://www.thecreditpros.com/terms/'
