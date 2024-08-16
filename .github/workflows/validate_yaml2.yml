@@ -1,0 +1,40 @@
+name: Validate YAML
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  
+  TARGET_PORTAL2_YAML_PATH: "DEV_portal_2.0_oas.yaml"
+  PY_VALIDATE_YAML_SCRIPT_PATH: "PythonScripts/validate_yaml.py"
+
+jobs:
+  validate_yaml:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyyaml
+
+    - name: Validate Portal 2 YAML and check custom rules
+      run: |
+        python PythonScripts/validate_yaml.py DEV_portal_2.0_oas.yaml
+
+    - name: Fail if custom rules are violated
+      if: failure()
+      run: exit 1
