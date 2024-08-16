@@ -1,0 +1,33 @@
+name: Replacement Dev to Pro and Generate PROD Yaml
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'  # Specify the Python version you need
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyyaml
+
+    - name: Run YAML replacement script
+      run: |
+        python path/to/your_script.py 'DEV_portal_2.0_oas.yaml'
+      env:
+        INPUT_YAML_PATH: 'DEV_portal_2.0_oas.yaml'
+        REPLACEMENTS: "[('The Credit Pros - DEV Portal 2.0 API', 'The Credit Pros - Portal 2.0 API'), ('https://api-dev2.thecreditpros.com/portal2', 'https://api.thecreditpros.com/portal2'), ('https://portal2.dev.thecreditpros.com/', 'https://portal2.thecreditpros.com/'), ('u7xdb3zrb1', 'PROD_u7xdb3zrb1'), ('AWS GW Dev Environment','AWS GW Prod Environment')]"
+
