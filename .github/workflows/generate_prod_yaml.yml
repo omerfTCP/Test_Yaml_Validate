@@ -28,7 +28,7 @@ jobs:
       run: |
         python -c "
         import os
-        from your_script import generate_prod_yaml
+        from PythonScripts/generate_prod_yaml.py import generate_prod_yaml
 
         file_path = 'DEV_portal_2.0_oas.yaml'
         replacements = [
