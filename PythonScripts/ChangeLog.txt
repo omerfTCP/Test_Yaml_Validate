@@ -1,0 +1,13 @@
+validate_yaml1.0.py
+===================
+Here are the validations checks
+	# Check for the basic structure requirements
+	# Check for x-amazon-apigateway-integration
+	# Check for parameters in each method
+	# Check for $ref in request and response schemas
+	
+	
+validate_yaml1.1.py
+===================
+Here are the additional validation checks added
+	# Check for sibling path conflicts and other validation rules
